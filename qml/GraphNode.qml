@@ -1,69 +1,208 @@
 import QtQuick 2.12
+import QtQuick.Controls 2.12
 
 Item {
     id: root
 
     property string code
     property string functionName
+    property int padding: 4
+    property int borderSize: 2
+    property string borderColor: "black"
+    property string functionNameSectionColor: "lightgrey"
+    property string sourceCodeSectionColor: "white"
 
-    width: childrenRect.width
-    height: childrenRect.height
+    width: sourceCodeText.implicitWidth
+    height: sourceCodeText.implicitHeight + functionNameText.implicitHeight
 
     signal linkActivated(string link)
 
     Rectangle {
-        id: fieldRect
+        height: root.height
+        width: root.width
+        clip: true
 
-        color: "white"
-        border.color: "black"
-        border.width: 2
-        width: childrenRect.width
-        height: childrenRect.height
+        Rectangle {
+            id: functionNameSection
+            width: parent.width
+            height: functionNameText.implicitHeight
+            color: root.functionNameSectionColor
+            anchors {
+                top: parent.top
+                left: parent.left
+                right: parent.right
+            }
 
-        Column {
-            Rectangle {
-                id: functionNameRect
+            Text {
+                id: functionNameText
+                text: functionName
+                font.bold: true
+                color: "white"
 
-                height: functionNameText.implicitHeight
-                width: parent.width
-                border.color: "black"
-                border.width: 2
-                color: "lightgrey"
+                padding: root.padding
+            }
+        }
 
-                Text {
-                    id: functionNameText
+        Rectangle {
+            id: sourceCodeSection
+            width: parent.width
+            height: parent.height - functionNameSection.height
+            clip: true
+            color: root.sourceCodeSectionColor
+            anchors {
+                top: functionNameSection.bottom
+                left: parent.left
+                right: parent.right
+            }
 
-                    anchors.left: parent.left
-                    anchors.leftMargin: 2
-                    color: "white"
-                    text: root.functionName
-                    font.bold: true
+            Text {
+                id: sourceCodeText
+                text: code
+                textFormat: Text.RichText
+                x: -hbar.position * width
+                y: -vbar.position * height
+                padding: root.padding
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                drag {
+                    target: root
+                    smoothed: true
+                }
+
+                onClicked: {
+                    let link = sourceCodeText.hoveredLink;
+                    if (link) {
+                        root.linkActivated(link);
+                    }
                 }
             }
 
-            Item {
-                height: sourceCodeText.implicitHeight
-                width: sourceCodeText.implicitWidth
+            ScrollBar {
+                id: vbar
+                hoverEnabled: true
+                active: hovered || pressed
+                orientation: Qt.Vertical
+                size: parent.height / sourceCodeText.height
+                anchors.top: parent.top
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+            }
 
-                Text {
-                    id: sourceCodeText
-                    font.pointSize: 10
-                    anchors.centerIn: parent
-                    textFormat: Text.RichText
-                    text: code
+            ScrollBar {
+                id: hbar
+                hoverEnabled: true
+                active: hovered || pressed
+                orientation: Qt.Horizontal
+                size: parent.width / sourceCodeText.width
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+            }
+        }
+
+        // Bottom border
+        Rectangle {
+            width: parent.width
+            height: root.borderSize
+            z: 1
+            color: root.borderColor
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+
+            MouseArea {
+                anchors.fill: parent
+                drag {
+                    target: parent
+                    axis: Drag.YAxis
+                }
+                cursorShape: Qt.SizeVerCursor
+                onMouseYChanged: {
+                    if (drag.active) {
+                        root.height += mouseY;
+                    }
                 }
             }
         }
-    }
 
-    DragHandler {}
+        // Top border
+        Rectangle {
+            width: parent.width
+            height: root.borderSize
+            z: 1
+            color: root.borderColor
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
 
-    TapHandler {
-        onTapped: {
-            let link = sourceCodeText.hoveredLink;
-            if (link) {
-                root.linkActivated(link);
+            MouseArea {
+                anchors.fill: parent
+                drag {
+                    target: parent
+                    axis: Drag.YAxis
+                }
+                cursorShape: Qt.SizeVerCursor
+                onMouseYChanged: {
+                    if (drag.active) {
+                        root.height -= mouseY;
+                        root.y +=  mouseY;
+                    }
+                }
             }
         }
+
+        // Left border
+        Rectangle {
+            width: root.borderSize
+            height: parent.height
+            z: 1
+            color: root.borderColor
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.bottom: parent.bottom
+
+            MouseArea {
+                anchors.fill: parent
+                drag {
+                    target: parent
+                    axis: Drag.XAxis
+                }
+                cursorShape: Qt.SizeHorCursor
+                onMouseYChanged: {
+                    if (drag.active) {
+                        root.width -= mouseX;
+                        root.x +=  mouseX;
+                    }
+                }
+            }
+        }
+
+        // Right border
+        Rectangle {
+            width: root.borderSize
+            height: parent.height
+            z: 1
+            color: root.borderColor
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+
+            MouseArea {
+                anchors.fill: parent
+                drag {
+                    target: parent
+                    axis: Drag.XAxis
+                }
+                cursorShape: Qt.SizeHorCursor
+                onMouseYChanged: {
+                    if (drag.active) {
+                        root.width += mouseX;
+                    }
+                }
+            }
+        }
+
     }
 }

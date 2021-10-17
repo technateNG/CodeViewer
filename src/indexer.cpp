@@ -267,7 +267,7 @@ void run_indexer(std::unordered_map<std::string, std::pair<std::string, std::str
 {
     CXIndex index = clang_createIndex(0, 1);
     CXCompilationDatabase_Error error_code;
-    CXCompilationDatabase c_database = clang_CompilationDatabase_fromDirectory("/home/user/Workspace/build", &error_code);
+    CXCompilationDatabase c_database = clang_CompilationDatabase_fromDirectory("/home/user/Workspace/build-CodeViewer-Desktop-Debug", &error_code);
     if (error_code != CXCompilationDatabase_NoError) {
         std::exit(1);
     }
